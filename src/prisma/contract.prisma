@@ -1,21 +1,73 @@
 // use prisma-next
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum DownloadStatus {
+  @@type("pg/text@1")
+  SUCCESS                = "SUCCESS"
+  INVALID_PASSWORD       = "INVALID_PASSWORD"
+  EXPIRED                = "EXPIRED"
+  DOWNLOAD_LIMIT_REACHED = "DOWNLOAD_LIMIT_REACHED"
+  REVOKED                = "REVOKED"
+  INTEGRITY_FAILED       = "INTEGRITY_FAILED"
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  files File[]
+}
+
+model File {
+  id           Int      @id @default(autoincrement())
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      Int
+  originalName String
+  storageKey   String   @unique
+  mimeType     String
+  size         BigInt
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  shareLinks   ShareLink[]
+  downloadLogs DownloadLog[]
+
+  @@index([ownerId])
+}
+
+model ShareLink {
+  id              Int      @id @default(autoincrement())
+  file            File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId          Int
+  tokenHash       String   @unique
+  passwordHash    String?
+  expiresAt       TimestamptzString?
+  maxDownloads    Int?
+  downloadCount   Int      @default(0)
+  oneTimeDownload Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       TimestamptzString @default(now())
+
+  downloadLogs DownloadLog[]
+
+  @@index([fileId])
+  @@index([isActive])
+  @@index([expiresAt])
+}
+
+model DownloadLog {
+  id          Int            @id @default(autoincrement())
+  file        File           @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId      Int
+  shareLink   ShareLink      @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
+  shareLinkId Int
+  status      DownloadStatus
+  createdAt   TimestamptzString @default(now())
+
+  @@index([fileId])
+  @@index([shareLinkId])
+  @@index([createdAt])
 }
