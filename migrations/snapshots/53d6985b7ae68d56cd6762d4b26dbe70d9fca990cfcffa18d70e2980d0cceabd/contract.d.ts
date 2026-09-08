@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'c9555e2745a8c94d223cf8bf7fd4035f6ab3bb682d5596f4e38054f146adbfce'>;
+  StorageHashBase<'53d6985b7ae68d56cd6762d4b26dbe70d9fca990cfcffa18d70e2980d0cceabd'>;
 export type ExecutionHash =
   ExecutionHashBase<'0971449f8532d9d5644660fd0a9b21cfd5e44000b286bcb78ed7b221536e8bb6'>;
 export type ProfileHash =
@@ -583,28 +583,16 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
-                  };
                 };
                 readonly encryptionIv: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
-                  };
                 };
                 readonly encryptionAuthTag: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
-                  };
                 };
                 readonly keyVersion: {
                   readonly nativeType: 'int4';
