@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ShareManager } from './ShareManager';
 
 export interface FileListItem {
   id: number;
@@ -28,6 +29,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
   const [files, setFiles] = useState(initialFiles);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<number | null>(null);
 
   async function handleDelete(id: number) {
     setError(null);
@@ -65,31 +67,41 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
       )}
       <ul className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-950">
         {files.map((file) => (
-          <li key={file.id} className="flex items-center justify-between gap-4 px-4 py-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">{file.originalName}</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                {file.mimeType} · {formatBytes(file.size)} ·{' '}
-                {new Date(file.createdAt).toLocaleDateString()} ·{' '}
-                <span className="text-emerald-700 dark:text-emerald-400">encrypted</span>
-              </p>
+          <li key={file.id} className="px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">{file.originalName}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-500">
+                  {file.mimeType} · {formatBytes(file.size)} ·{' '}
+                  {new Date(file.createdAt).toLocaleDateString()} ·{' '}
+                  <span className="text-emerald-700 dark:text-emerald-400">encrypted</span>
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={`/api/files/${file.id}/download`}
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                >
+                  Download
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSharingId((prev) => (prev === file.id ? null : file.id))}
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                >
+                  {sharingId === file.id ? 'Close' : 'Share'}
+                </button>
+                <button
+                  type="button"
+                  disabled={busyId === file.id}
+                  onClick={() => handleDelete(file.id)}
+                  className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  {busyId === file.id ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <a
-                href={`/api/files/${file.id}/download`}
-                className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-              >
-                Download
-              </a>
-              <button
-                type="button"
-                disabled={busyId === file.id}
-                onClick={() => handleDelete(file.id)}
-                className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
-              >
-                {busyId === file.id ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
+            {sharingId === file.id && <ShareManager fileId={file.id} />}
           </li>
         ))}
       </ul>
