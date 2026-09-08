@@ -73,7 +73,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
                 <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">{file.originalName}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-500">
                   {file.mimeType} · {formatBytes(file.size)} ·{' '}
-                  {new Date(file.createdAt).toLocaleDateString()} ·{' '}
+                  {new Date(file.createdAt).toLocaleDateString('en-US')} ·{' '}
                   <span className="text-emerald-700 dark:text-emerald-400">encrypted</span>
                 </p>
               </div>

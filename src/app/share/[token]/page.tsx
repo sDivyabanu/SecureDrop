@@ -43,7 +43,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
               </p>
               {info.expiresAt && (
                 <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
-                  Expires {new Date(info.expiresAt).toLocaleString()}
+                  Expires {new Date(info.expiresAt).toLocaleString('en-US')}
                 </p>
               )}
               <p className="mt-2 flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400">

@@ -16,7 +16,7 @@ function describeRestrictions(link: ShareLinkSummary): string {
   const parts: string[] = [];
   parts.push(link.oneTimeDownload ? 'One-time download' : `${link.downloadCount} download${link.downloadCount === 1 ? '' : 's'}`);
   if (link.maxDownloads !== null) parts.push(`limit ${link.maxDownloads}`);
-  if (link.expiresAt) parts.push(`expires ${new Date(link.expiresAt).toLocaleString()}`);
+  if (link.expiresAt) parts.push(`expires ${new Date(link.expiresAt).toLocaleString('en-US')}`);
   if (!link.isActive) parts.push('revoked');
   return parts.join(' · ');
 }
