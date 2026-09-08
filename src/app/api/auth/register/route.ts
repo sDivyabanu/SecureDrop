@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/prisma/db';
 import { hashPassword } from '@/lib/auth/password';
+import { parseJsonBody } from '@/lib/http/json-body';
 
 const registerSchema = z
   .object({
@@ -21,14 +22,12 @@ const registerSchema = z
   });
 
 export async function POST(req: Request) {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Malformed request body' }, { status: 400 });
+  const parsedBody = await parseJsonBody(req);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
   }
 
-  const parsed = registerSchema.safeParse(body);
+  const parsed = registerSchema.safeParse(parsedBody.body);
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0];
     return NextResponse.json({ error: firstIssue?.message ?? 'Invalid registration data' }, { status: 400 });

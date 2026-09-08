@@ -16,6 +16,10 @@
       "model": "ShareLink",
       "namespace": "public"
     },
+    "shareRateLimit": {
+      "model": "ShareRateLimit",
+      "namespace": "public"
+    },
     "user": {
       "model": "User",
       "namespace": "public"
@@ -434,6 +438,21 @@
                   "model": "File",
                   "namespace": "public"
                 }
+              },
+              "rateLimits": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "shareLinkId"
+                  ]
+                },
+                "to": {
+                  "model": "ShareRateLimit",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -471,6 +490,93 @@
               },
               "namespaceId": "public",
               "table": "shareLink"
+            }
+          },
+          "ShareRateLimit": {
+            "fields": {
+              "attemptCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "identifier": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "shareLinkId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "windowStart": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "shareLink": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "shareLinkId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ShareLink",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "attemptCount": {
+                  "column": "attemptCount"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "identifier": {
+                  "column": "identifier"
+                },
+                "shareLinkId": {
+                  "column": "shareLinkId"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                },
+                "windowStart": {
+                  "column": "windowStart"
+                }
+              },
+              "namespaceId": "public",
+              "table": "shareRateLimit"
             }
           },
           "User": {
@@ -947,6 +1053,94 @@
                 }
               ]
             },
+            "shareRateLimit": {
+              "columns": {
+                "attemptCount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 1
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "identifier": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "shareLinkId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "windowStart": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "shareLinkId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shareRateLimit"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shareLink"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "shareLinkId"
+                  ],
+                  "name": "shareRateLimit_shareLinkId_idx_373d21c1",
+                  "prefix": "shareRateLimit_shareLinkId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "shareLinkId",
+                    "identifier"
+                  ]
+                }
+              ]
+            },
             "user": {
               "columns": {
                 "createdAt": {
@@ -1022,10 +1216,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c9555e2745a8c94d223cf8bf7fd4035f6ab3bb682d5596f4e38054f146adbfce"
+    "storageHash": "fe2ae02ecc221e8f7a98da0707200761c62762e3047e9fd83afab7846efc7ddb"
   },
   "execution": {
-    "executionHash": "0971449f8532d9d5644660fd0a9b21cfd5e44000b286bcb78ed7b221536e8bb6",
+    "executionHash": "5f64ca77a8dcf97d9e2486938984f8c7d7bed83346e0a7eef532a451b3102862",
     "mutations": {
       "defaults": [
         {
@@ -1041,6 +1235,21 @@
             "column": "updatedAt",
             "namespace": "public",
             "table": "file"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updatedAt",
+            "namespace": "public",
+            "table": "shareRateLimit"
           }
         },
         {

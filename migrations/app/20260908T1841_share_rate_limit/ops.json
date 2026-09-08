@@ -1,0 +1,164 @@
+[
+  {
+    "id": "table.shareRateLimit",
+    "label": "Create table \"shareRateLimit\"",
+    "summary": "Creates table \"shareRateLimit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "shareRateLimit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"shareRateLimit\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"shareRateLimit\"",
+        "sql": "CREATE TABLE \"public\".\"shareRateLimit\" (\n  \"attemptCount\" int4 DEFAULT 1 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"identifier\" text NOT NULL,\n  \"shareLinkId\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"windowStart\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"shareRateLimit\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.shareRateLimit.shareRateLimit_shareLinkId_identifier_key",
+    "label": "Add unique constraint on \"shareRateLimit\" (shareLinkId, identifier)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "shareRateLimit_shareLinkId_identifier_key",
+        "table": "shareRateLimit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"shareRateLimit_shareLinkId_identifier_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareRateLimit_shareLinkId_identifier_key",
+          "public",
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"shareRateLimit_shareLinkId_identifier_key\"",
+        "sql": "ALTER TABLE \"public\".\"shareRateLimit\" ADD CONSTRAINT \"shareRateLimit_shareLinkId_identifier_key\" UNIQUE (\"shareLinkId\", \"identifier\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"shareRateLimit_shareLinkId_identifier_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareRateLimit_shareLinkId_identifier_key",
+          "public",
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shareRateLimit.shareRateLimit_shareLinkId_idx_373d21c1",
+    "label": "Create index \"shareRateLimit_shareLinkId_idx_373d21c1\" on \"shareRateLimit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shareRateLimit_shareLinkId_idx_373d21c1",
+        "table": "shareRateLimit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shareRateLimit_shareLinkId_idx_373d21c1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareRateLimit_shareLinkId_idx_373d21c1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shareRateLimit_shareLinkId_idx_373d21c1\"",
+        "sql": "CREATE INDEX \"shareRateLimit_shareLinkId_idx_373d21c1\" ON \"public\".\"shareRateLimit\" (\"shareLinkId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shareRateLimit_shareLinkId_idx_373d21c1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareRateLimit_shareLinkId_idx_373d21c1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shareRateLimit.shareRateLimit_shareLinkId_fkey",
+    "label": "Add foreign key \"shareRateLimit_shareLinkId_fkey\" on \"shareRateLimit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shareRateLimit_shareLinkId_fkey",
+        "table": "shareRateLimit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shareRateLimit_shareLinkId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareRateLimit_shareLinkId_fkey",
+          "public",
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shareRateLimit_shareLinkId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shareRateLimit\"\nADD CONSTRAINT \"shareRateLimit_shareLinkId_fkey\"\nFOREIGN KEY (\"shareLinkId\")\nREFERENCES \"public\".\"shareLink\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shareRateLimit_shareLinkId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareRateLimit_shareLinkId_fkey",
+          "public",
+          "\"public\".\"shareRateLimit\""
+        ]
+      }
+    ]
+  }
+]

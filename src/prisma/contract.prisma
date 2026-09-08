@@ -63,10 +63,30 @@ model ShareLink {
   createdAt       TimestamptzString @default(now())
 
   downloadLogs DownloadLog[]
+  rateLimits   ShareRateLimit[]
 
   @@index([fileId])
   @@index([isActive])
   @@index([expiresAt])
+}
+
+// Fixed-window rate-limit counter for password attempts on a share link.
+// One row per (shareLink, requester) pair — not one row per attempt — so
+// repeated guesses from the same requester against the same link update a
+// single row in place instead of growing the table without bound. Growth is
+// bounded by the number of distinct (shareLink, requester) pairs that have
+// ever attempted a password, not by request volume.
+model ShareRateLimit {
+  id           Int       @id @default(autoincrement())
+  shareLink    ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
+  shareLinkId  Int
+  // SHA-256 hash of the requester's IP address (never stored raw).
+  identifier   String
+  attemptCount Int       @default(1)
+  windowStart  TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  @@unique([shareLinkId, identifier])
 }
 
 model DownloadLog {

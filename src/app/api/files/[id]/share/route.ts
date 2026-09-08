@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { db } from '@/prisma/db';
 import { hashPassword } from '@/lib/auth/password';
 import { generateShareToken, hashShareToken } from '@/lib/share/token';
+import { parseJsonBody } from '@/lib/http/json-body';
 
 export const runtime = 'nodejs';
 
@@ -90,14 +91,12 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    body = {};
+  const parsedBody = await parseJsonBody(req);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
   }
 
-  const parsed = createShareSchema.safeParse(body);
+  const parsed = createShareSchema.safeParse(parsedBody.body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid share options' }, { status: 400 });
   }

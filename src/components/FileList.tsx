@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShareManager } from './ShareManager';
+import { DownloadHistory } from './DownloadHistory';
 
 export interface FileListItem {
   id: number;
@@ -30,6 +31,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<number | null>(null);
+  const [historyId, setHistoryId] = useState<number | null>(null);
 
   async function handleDelete(id: number) {
     setError(null);
@@ -68,7 +70,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
       <ul className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-950">
         {files.map((file) => (
           <li key={file.id} className="px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">{file.originalName}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-500">
@@ -77,7 +79,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
                   <span className="text-emerald-700 dark:text-emerald-400">encrypted</span>
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <a
                   href={`/api/files/${file.id}/download`}
                   className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
@@ -86,10 +88,25 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
                 </a>
                 <button
                   type="button"
-                  onClick={() => setSharingId((prev) => (prev === file.id ? null : file.id))}
+                  aria-expanded={sharingId === file.id}
+                  onClick={() => {
+                    setSharingId((prev) => (prev === file.id ? null : file.id));
+                    setHistoryId(null);
+                  }}
                   className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
                 >
                   {sharingId === file.id ? 'Close' : 'Share'}
+                </button>
+                <button
+                  type="button"
+                  aria-expanded={historyId === file.id}
+                  onClick={() => {
+                    setHistoryId((prev) => (prev === file.id ? null : file.id));
+                    setSharingId(null);
+                  }}
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                >
+                  {historyId === file.id ? 'Close' : 'History'}
                 </button>
                 <button
                   type="button"
@@ -102,6 +119,7 @@ export function FileList({ initialFiles }: { initialFiles: FileListItem[] }) {
               </div>
             </div>
             {sharingId === file.id && <ShareManager fileId={file.id} />}
+            {historyId === file.id && <DownloadHistory fileId={file.id} />}
           </li>
         ))}
       </ul>
