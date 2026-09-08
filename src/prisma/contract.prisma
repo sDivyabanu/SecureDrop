@@ -29,6 +29,17 @@ model File {
   storageKey   String   @unique
   mimeType     String
   size         BigInt
+
+  // AES-256-GCM encryption metadata (base64-encoded). Required to derive the
+  // per-file key and to decrypt/verify the stored ciphertext. Application
+  // code always supplies real values on insert; the "" default exists only
+  // so this column can be added additively (no backfill of real data is
+  // possible for a schema migration, and none is needed on an empty table).
+  encryptionSalt    String @default("")
+  encryptionIv      String @default("")
+  encryptionAuthTag String @default("")
+  keyVersion        Int    @default(1)
+
   createdAt    TimestamptzString @default(now())
   updatedAt    temporal.updatedAtString()
 

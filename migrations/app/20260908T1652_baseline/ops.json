@@ -1,0 +1,742 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.downloadLog",
+    "label": "Create table \"downloadLog\"",
+    "summary": "Creates table \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"downloadLog\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"downloadLog\"",
+        "sql": "CREATE TABLE \"public\".\"downloadLog\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"fileId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"shareLinkId\" int4 NOT NULL,\n  \"status\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"downloadLog_status_check_278ba962\" CHECK (\"status\" IN ('SUCCESS', 'INVALID_PASSWORD', 'EXPIRED', 'DOWNLOAD_LIMIT_REACHED', 'REVOKED', 'INTEGRITY_FAILED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"downloadLog\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.file",
+    "label": "Create table \"file\"",
+    "summary": "Creates table \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"file\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"file\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"file\"",
+        "sql": "CREATE TABLE \"public\".\"file\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"mimeType\" text NOT NULL,\n  \"originalName\" text NOT NULL,\n  \"ownerId\" int4 NOT NULL,\n  \"size\" int8 NOT NULL,\n  \"storageKey\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"file\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"file\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.shareLink",
+    "label": "Create table \"shareLink\"",
+    "summary": "Creates table \"shareLink\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"shareLink\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"shareLink\"",
+        "sql": "CREATE TABLE \"public\".\"shareLink\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"downloadCount\" int4 DEFAULT 0 NOT NULL,\n  \"expiresAt\" timestamptz,\n  \"fileId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"maxDownloads\" int4,\n  \"oneTimeDownload\" bool DEFAULT false NOT NULL,\n  \"passwordHash\" text,\n  \"tokenHash\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"shareLink\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.user",
+    "label": "Create table \"user\"",
+    "summary": "Creates table \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"user\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"user\"",
+        "sql": "CREATE TABLE \"public\".\"user\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text,\n  \"passwordHash\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"user\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.file.file_storageKey_key",
+    "label": "Add unique constraint on \"file\" (storageKey)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "file_storageKey_key",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"file_storageKey_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "file_storageKey_key",
+          "public",
+          "\"public\".\"file\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"file_storageKey_key\"",
+        "sql": "ALTER TABLE \"public\".\"file\" ADD CONSTRAINT \"file_storageKey_key\" UNIQUE (\"storageKey\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"file_storageKey_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "file_storageKey_key",
+          "public",
+          "\"public\".\"file\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.shareLink.shareLink_tokenHash_key",
+    "label": "Add unique constraint on \"shareLink\" (tokenHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "shareLink_tokenHash_key",
+        "table": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"shareLink_tokenHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareLink_tokenHash_key",
+          "public",
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"shareLink_tokenHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"shareLink\" ADD CONSTRAINT \"shareLink_tokenHash_key\" UNIQUE (\"tokenHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"shareLink_tokenHash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareLink_tokenHash_key",
+          "public",
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user.user_email_key",
+    "label": "Add unique constraint on \"user\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_email_key",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD CONSTRAINT \"user_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"user_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.downloadLog.downloadLog_createdAt_idx_9575dbd7",
+    "label": "Create index \"downloadLog_createdAt_idx_9575dbd7\" on \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "downloadLog_createdAt_idx_9575dbd7",
+        "table": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"downloadLog_createdAt_idx_9575dbd7\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_createdAt_idx_9575dbd7\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"downloadLog_createdAt_idx_9575dbd7\"",
+        "sql": "CREATE INDEX \"downloadLog_createdAt_idx_9575dbd7\" ON \"public\".\"downloadLog\" (\"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"downloadLog_createdAt_idx_9575dbd7\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_createdAt_idx_9575dbd7\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.downloadLog.downloadLog_fileId_idx_9a9e456b",
+    "label": "Create index \"downloadLog_fileId_idx_9a9e456b\" on \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "downloadLog_fileId_idx_9a9e456b",
+        "table": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"downloadLog_fileId_idx_9a9e456b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_fileId_idx_9a9e456b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"downloadLog_fileId_idx_9a9e456b\"",
+        "sql": "CREATE INDEX \"downloadLog_fileId_idx_9a9e456b\" ON \"public\".\"downloadLog\" (\"fileId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"downloadLog_fileId_idx_9a9e456b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_fileId_idx_9a9e456b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.downloadLog.downloadLog_shareLinkId_idx_373d21c1",
+    "label": "Create index \"downloadLog_shareLinkId_idx_373d21c1\" on \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "downloadLog_shareLinkId_idx_373d21c1",
+        "table": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"downloadLog_shareLinkId_idx_373d21c1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_shareLinkId_idx_373d21c1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"downloadLog_shareLinkId_idx_373d21c1\"",
+        "sql": "CREATE INDEX \"downloadLog_shareLinkId_idx_373d21c1\" ON \"public\".\"downloadLog\" (\"shareLinkId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"downloadLog_shareLinkId_idx_373d21c1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"downloadLog_shareLinkId_idx_373d21c1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.file.file_ownerId_idx_e2d0c1ef",
+    "label": "Create index \"file_ownerId_idx_e2d0c1ef\" on \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "file_ownerId_idx_e2d0c1ef",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"file_ownerId_idx_e2d0c1ef\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"file_ownerId_idx_e2d0c1ef\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"file_ownerId_idx_e2d0c1ef\"",
+        "sql": "CREATE INDEX \"file_ownerId_idx_e2d0c1ef\" ON \"public\".\"file\" (\"ownerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"file_ownerId_idx_e2d0c1ef\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"file_ownerId_idx_e2d0c1ef\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shareLink.shareLink_expiresAt_idx_6b6b8c10",
+    "label": "Create index \"shareLink_expiresAt_idx_6b6b8c10\" on \"shareLink\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shareLink_expiresAt_idx_6b6b8c10",
+        "table": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shareLink_expiresAt_idx_6b6b8c10\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_expiresAt_idx_6b6b8c10\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shareLink_expiresAt_idx_6b6b8c10\"",
+        "sql": "CREATE INDEX \"shareLink_expiresAt_idx_6b6b8c10\" ON \"public\".\"shareLink\" (\"expiresAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shareLink_expiresAt_idx_6b6b8c10\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_expiresAt_idx_6b6b8c10\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shareLink.shareLink_fileId_idx_9a9e456b",
+    "label": "Create index \"shareLink_fileId_idx_9a9e456b\" on \"shareLink\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shareLink_fileId_idx_9a9e456b",
+        "table": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shareLink_fileId_idx_9a9e456b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_fileId_idx_9a9e456b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shareLink_fileId_idx_9a9e456b\"",
+        "sql": "CREATE INDEX \"shareLink_fileId_idx_9a9e456b\" ON \"public\".\"shareLink\" (\"fileId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shareLink_fileId_idx_9a9e456b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_fileId_idx_9a9e456b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shareLink.shareLink_isActive_idx_77fe3ba1",
+    "label": "Create index \"shareLink_isActive_idx_77fe3ba1\" on \"shareLink\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shareLink_isActive_idx_77fe3ba1",
+        "table": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shareLink_isActive_idx_77fe3ba1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_isActive_idx_77fe3ba1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shareLink_isActive_idx_77fe3ba1\"",
+        "sql": "CREATE INDEX \"shareLink_isActive_idx_77fe3ba1\" ON \"public\".\"shareLink\" (\"isActive\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shareLink_isActive_idx_77fe3ba1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shareLink_isActive_idx_77fe3ba1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.downloadLog.downloadLog_fileId_fkey",
+    "label": "Add foreign key \"downloadLog_fileId_fkey\" on \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "downloadLog_fileId_fkey",
+        "table": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"downloadLog_fileId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "downloadLog_fileId_fkey",
+          "public",
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"downloadLog_fileId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"downloadLog\"\nADD CONSTRAINT \"downloadLog_fileId_fkey\"\nFOREIGN KEY (\"fileId\")\nREFERENCES \"public\".\"file\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"downloadLog_fileId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "downloadLog_fileId_fkey",
+          "public",
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.downloadLog.downloadLog_shareLinkId_fkey",
+    "label": "Add foreign key \"downloadLog_shareLinkId_fkey\" on \"downloadLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "downloadLog_shareLinkId_fkey",
+        "table": "downloadLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"downloadLog_shareLinkId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "downloadLog_shareLinkId_fkey",
+          "public",
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"downloadLog_shareLinkId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"downloadLog\"\nADD CONSTRAINT \"downloadLog_shareLinkId_fkey\"\nFOREIGN KEY (\"shareLinkId\")\nREFERENCES \"public\".\"shareLink\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"downloadLog_shareLinkId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "downloadLog_shareLinkId_fkey",
+          "public",
+          "\"public\".\"downloadLog\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.file.file_ownerId_fkey",
+    "label": "Add foreign key \"file_ownerId_fkey\" on \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "file_ownerId_fkey",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"file_ownerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "file_ownerId_fkey",
+          "public",
+          "\"public\".\"file\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"file_ownerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"file\"\nADD CONSTRAINT \"file_ownerId_fkey\"\nFOREIGN KEY (\"ownerId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"file_ownerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "file_ownerId_fkey",
+          "public",
+          "\"public\".\"file\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shareLink.shareLink_fileId_fkey",
+    "label": "Add foreign key \"shareLink_fileId_fkey\" on \"shareLink\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shareLink_fileId_fkey",
+        "table": "shareLink"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shareLink_fileId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareLink_fileId_fkey",
+          "public",
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shareLink_fileId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shareLink\"\nADD CONSTRAINT \"shareLink_fileId_fkey\"\nFOREIGN KEY (\"fileId\")\nREFERENCES \"public\".\"file\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shareLink_fileId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shareLink_fileId_fkey",
+          "public",
+          "\"public\".\"shareLink\""
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,170 @@
+[
+  {
+    "id": "column.public.file.encryptionAuthTag",
+    "label": "Add column \"encryptionAuthTag\" to \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "encryptionAuthTag",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"encryptionAuthTag\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionAuthTag"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"encryptionAuthTag\"",
+        "sql": "ALTER TABLE \"public\".\"file\" ADD COLUMN \"encryptionAuthTag\" text DEFAULT '' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"encryptionAuthTag\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionAuthTag"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.file.encryptionIv",
+    "label": "Add column \"encryptionIv\" to \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "encryptionIv",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"encryptionIv\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionIv"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"encryptionIv\"",
+        "sql": "ALTER TABLE \"public\".\"file\" ADD COLUMN \"encryptionIv\" text DEFAULT '' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"encryptionIv\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionIv"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.file.encryptionSalt",
+    "label": "Add column \"encryptionSalt\" to \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "encryptionSalt",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"encryptionSalt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionSalt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"encryptionSalt\"",
+        "sql": "ALTER TABLE \"public\".\"file\" ADD COLUMN \"encryptionSalt\" text DEFAULT '' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"encryptionSalt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "encryptionSalt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.file.keyVersion",
+    "label": "Add column \"keyVersion\" to \"file\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "keyVersion",
+        "table": "file"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"keyVersion\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "keyVersion"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"keyVersion\"",
+        "sql": "ALTER TABLE \"public\".\"file\" ADD COLUMN \"keyVersion\" int4 DEFAULT 1 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"keyVersion\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "file",
+          "keyVersion"
+        ]
+      }
+    ]
+  }
+]

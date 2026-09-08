@@ -163,7 +163,35 @@
                   "kind": "scalar"
                 }
               },
+              "encryptionAuthTag": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "encryptionIv": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "encryptionSalt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "keyVersion": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
@@ -265,8 +293,20 @@
                 "createdAt": {
                   "column": "createdAt"
                 },
+                "encryptionAuthTag": {
+                  "column": "encryptionAuthTag"
+                },
+                "encryptionIv": {
+                  "column": "encryptionIv"
+                },
+                "encryptionSalt": {
+                  "column": "encryptionSalt"
+                },
                 "id": {
                   "column": "id"
+                },
+                "keyVersion": {
+                  "column": "keyVersion"
                 },
                 "mimeType": {
                   "column": "mimeType"
@@ -658,11 +698,47 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "encryptionAuthTag": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": ""
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "encryptionIv": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": ""
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "encryptionSalt": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": ""
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
                     "expression": "autoincrement()",
                     "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "keyVersion": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 1
                   },
                   "nativeType": "int4",
                   "nullable": false
@@ -946,7 +1022,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "46ff17a429672f81686165532a374c376b2cf7f8900de752e01e8be4313fd96e"
+    "storageHash": "c9555e2745a8c94d223cf8bf7fd4035f6ab3bb682d5596f4e38054f146adbfce"
   },
   "execution": {
     "executionHash": "0971449f8532d9d5644660fd0a9b21cfd5e44000b286bcb78ed7b221536e8bb6",
