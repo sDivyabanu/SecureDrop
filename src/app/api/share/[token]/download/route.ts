@@ -6,6 +6,8 @@ import { sanitizeForContentDisposition } from '@/lib/files/validation';
 import { verifyPassword } from '@/lib/auth/password';
 import { findShareLinkByToken, evaluateShareBlock, claimShareLinkDownload } from '@/lib/share/access';
 import { logDownloadAttempt } from '@/lib/share/download-log';
+import { checkShareRateLimit, getClientIp, hashRequesterIp } from '@/lib/share/rate-limit';
+import { parseJsonBody } from '@/lib/http/json-body';
 
 export const runtime = 'nodejs';
 
@@ -44,12 +46,21 @@ export async function POST(req: Request, context: { params: Promise<{ token: str
   }
 
   if (link.passwordHash) {
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      body = {};
+    // Rate-limited per (share link, requester) before the password is even
+    // checked — a Postgres-backed fixed-window counter, not in-memory, so
+    // it holds up across multiple/serverless instances. See lib/share/rate-limit.ts.
+    const identifier = hashRequesterIp(getClientIp(req));
+    const rateLimit = await checkShareRateLimit(link.id, identifier);
+    if (!rateLimit.allowed) {
+      await logDownloadAttempt(link.fileId, link.id, 'INVALID_PASSWORD');
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } },
+      );
     }
+
+    const parsedBody = await parseJsonBody(req);
+    const body = parsedBody.ok ? parsedBody.body : {};
     const password = typeof body === 'object' && body !== null && 'password' in body ? (body as { password?: unknown }).password : undefined;
 
     if (typeof password !== 'string' || password.length === 0 || !(await verifyPassword(link.passwordHash, password))) {
