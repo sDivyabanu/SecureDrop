@@ -9,11 +9,14 @@ const HKDF_INFO = Buffer.from('securedrop-file-key-v1');
 let cachedMasterKey: Buffer | null = null;
 
 /**
- * Loads and validates ENCRYPTION_MASTER_KEY on first use (not at module
- * import time, so builds/tooling that never touch encryption don't need the
- * variable set). Throws a clear, non-sensitive error on a missing/malformed key.
+ * Loads and validates ENCRYPTION_MASTER_KEY. Not called at module import
+ * time, so builds/tooling that never touch encryption don't need the
+ * variable set — but exported so instrumentation.ts's startup check can
+ * call it eagerly and fail fast on a missing/malformed key instead of
+ * waiting for the first upload/download to hit it. Throws a clear,
+ * non-sensitive error either way.
  */
-function getMasterKey(): Buffer {
+export function getMasterKey(): Buffer {
   if (cachedMasterKey) return cachedMasterKey;
 
   const raw = process.env.ENCRYPTION_MASTER_KEY;
